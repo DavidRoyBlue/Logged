@@ -2,7 +2,9 @@
   "name": "logged",
   "private": true,
   "packageManager": "pnpm@10.15.0",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
@@ -11,6 +13,7 @@
     "db:reset": "supabase db reset"
   },
   "devDependencies": {
+    "supabase": "^2.104.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }
