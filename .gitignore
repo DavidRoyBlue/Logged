@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.expo/
+.env*
+!.env.example
+supabase/.branches/
+supabase/.temp/
+coverage/
