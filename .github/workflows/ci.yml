@@ -1,0 +1,45 @@
+name: CI
+on:
+  push: { branches: [main, master] }
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pnpm version comes from "packageManager" field in root package.json (pnpm@10.15.0)
+      # Do NOT pass version: here — providing both causes a "multiple versions" conflict.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm -r --filter '!@logged/db-tests' test
+
+  db-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pnpm version comes from "packageManager" field in root package.json (pnpm@10.15.0)
+      # Do NOT pass version: here — providing both causes a "multiple versions" conflict.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.104.0 }
+      - run: supabase start
+      - run: pnpm install --frozen-lockfile
+      - name: Export local Supabase env
+        # `supabase status -o env` (v2.104.0) emits: API_URL, ANON_KEY, SERVICE_ROLE_KEY
+        # The db-tests helper (supabase/tests/helpers.ts) reads: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+        # We remap here so the names match what the helper expects.
+        run: |
+          eval "$(pnpm exec supabase status -o env)"
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+        shell: bash
+      - run: pnpm --filter @logged/db-tests test
