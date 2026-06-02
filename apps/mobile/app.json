@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Logged",
+    "slug": "logged",
+    "scheme": "logged",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}
