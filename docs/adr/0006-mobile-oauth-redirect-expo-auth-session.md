@@ -15,7 +15,7 @@ The flow is:
 
 1. The app opens the OAuth provider's authorization URL (constructed in the Edge Function or client, with `state` and PKCE challenge).
 2. The provider's `redirect_uri` points at the **Supabase Edge Function** (HTTPS), which receives the authorization code server-side.
-3. The Edge Function completes the code exchange (keeping the client secret server-side), then issues an HTTP 302 redirect to `logged://auth/callback?handoff_token=<token>`.
+3. The Edge Function completes the code exchange (keeping the client secret server-side), then issues an HTTP 302 redirect to `logged://oauth/callback?code=<token>`.
 4. iOS/Android intercepts the deep link, and `WebBrowser.openAuthSessionAsync` resolves with the result URL.
 5. The app redeems the handoff token via a separate Edge Function call (see ADR 0005).
 

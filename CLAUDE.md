@@ -22,7 +22,7 @@ Logged is a mobile running app that auto-syncs Strava activities, manages app-ow
 ## Tech stack
 
 - **Language**: TypeScript throughout
-- **Package manager**: pnpm workspaces (pnpm 10.15 / Node 24)
+- **Package manager**: pnpm workspaces (pnpm 10.15, Node >=20 (developed on Node 24))
 - **Database / Auth / Realtime**: Supabase (Postgres, Auth, Edge Functions, Realtime, pgmq)
 - **Workers**: Cloud Run — Hono on Node 20+
 - **Mobile**: Expo / React Native with Expo Router
@@ -41,12 +41,11 @@ pnpm install              # install all workspace deps
 pnpm exec supabase start  # start local Supabase stack (Docker required)
 pnpm exec supabase stop   # stop local Supabase stack
 
-pnpm build                # build all packages
 pnpm typecheck            # type-check all packages
 pnpm lint                 # lint all packages
 pnpm lint --fix           # auto-fix linting issues
 pnpm test                 # run all tests (Vitest + Jest)
-pnpm test --filter core   # run tests for a specific package
+pnpm --filter @logged/core test   # run tests for a specific package
 
 pnpm exec supabase db push        # apply pending DB migrations
 pnpm exec supabase db diff        # generate migration from schema diff

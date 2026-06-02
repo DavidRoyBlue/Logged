@@ -25,10 +25,12 @@ Logged is a mobile running app that automatically syncs your Strava activities, 
 ┌─────────────────────────▼───────────────────────────────┐
 │  Cloud Run Workers (services/worker)                    │
 │  Hono · Node 20+                                       │
-│  ├─ /ingest   — process queued Strava activities       │
-│  ├─ /sync     — keep Strava token fresh                │
-│  ├─ /backfill — historical activity import             │
-│  └─ /drain    — Cloud Scheduler safety net             │
+│  ├─ /ingest     — process queued Strava activities     │
+│  ├─ /sync       — matcher + outbound adapters          │
+│  │               (complete plans / log to Cal+Notion)  │
+│  ├─ /plan-push  — push app plans to Calendar + Notion  │
+│  ├─ /backfill   — historical activity import           │
+│  └─ /drain      — Cloud Scheduler safety net           │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -66,7 +68,7 @@ logged/
 
 ### Prerequisites
 
-- **Node 24+** (or use [nvm](https://github.com/nvm-sh/nvm) / [fnm](https://github.com/Schniz/fnm))
+- **Node 20+** (or use [nvm](https://github.com/nvm-sh/nvm) / [fnm](https://github.com/Schniz/fnm))
 - **pnpm 10.15+** — `npm install -g pnpm`
 - **Docker Desktop** (for local Supabase stack)
 - **Supabase CLI** — installed via `pnpm exec supabase` (workspace devDep)
@@ -83,7 +85,7 @@ cp .env.example .env.local
 # 3. Start the local Supabase stack (Postgres, Auth, Edge Functions, Studio)
 pnpm exec supabase start
 
-# 4. Apply migrations and seed data
+# 4. Apply pending schema migrations (seed data runs on supabase db reset / supabase start)
 pnpm exec supabase db push
 
 # 5. Run all tests

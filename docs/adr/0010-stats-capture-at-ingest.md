@@ -11,7 +11,7 @@ Logged will eventually display training load analytics: race detection, heart ra
 
 At Layer 0 ingest, capture the following fields even though the visualizations that use them ship later:
 
-- **`workout_type`**: Strava's activity type enum, used for race detection (e.g., `workout_type === 11` = race).
+- **`workout_type`**: Strava's activity type enum, used for race detection (e.g., `workout_type === 1` = race).
 - **`zone_distribution`** (approximate): computed from `average_heartrate` + the athlete's HR zones fetched at ingest time. This is an approximation; exact zone distribution requires HR streams (Layer 1).
 - **`athlete_zones`**: snapshot of the athlete's HR zone boundaries at the time of the activity, stored alongside the activity so future recalculations use period-accurate zones.
 

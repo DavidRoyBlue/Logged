@@ -9,7 +9,7 @@ Logged spans three distinct runtime environments: Expo/React Native (mobile), No
 
 ## Decision
 
-Use **pnpm workspaces** as the monorepo tool (pnpm 10.15 / Node 24), with TypeScript throughout.
+Use **pnpm workspaces** as the monorepo tool (pnpm 10.15, Node >=20 (developed on Node 24)), with TypeScript throughout.
 
 Isolate all pure domain logic in **`packages/core`**:
 

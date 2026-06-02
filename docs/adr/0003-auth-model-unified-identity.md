@@ -21,4 +21,4 @@ Adopt a **unified identity model**:
 - User data (plans, matched runs, stats) is always scoped to one stable identity regardless of which external accounts are connected.
 - Linking Strava to an existing account requires matching on Strava athlete ID in the Edge Function — a small amount of custom logic.
 - Future external providers (Garmin, Wahoo) follow the same `connections` pattern with no schema change.
-- Unlinking an external account is a `DELETE` on the `connections` row; re-linking is an upsert.
+- Unlinking an external account sets `status='revoked'` on the `connections` row (soft delete — preserves history and stored activities); re-linking flips the status back to `active` and re-runs OAuth. This is not a hard `DELETE` and not an upsert (which could duplicate rows).
