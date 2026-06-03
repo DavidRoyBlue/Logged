@@ -1,0 +1,12 @@
+{
+  "heart_rate": {
+    "custom_zones": true,
+    "zones": [
+      {"min": 0,   "max": 120},
+      {"min": 120, "max": 140},
+      {"min": 140, "max": 160},
+      {"min": 160, "max": 175},
+      {"min": 175, "max": -1}
+    ]
+  }
+}
