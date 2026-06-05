@@ -1,0 +1,135 @@
+# Automated ADR critique.
+#
+# Setup before this runs:
+#   1. Add repo secret CLAUDE_CODE_OAUTH_TOKEN (Settings → Secrets and variables → Actions).
+#   2. Set --model below to a current model id (e.g. claude-opus-4-8). Update when models change.
+#   3. Adjust the `paths:` globs if your ADRs live somewhere other than docs/architecture/decisions/.
+#
+# On an ADR PR: posts a single outsider-critique comment.
+# On manual dispatch: reviews every ADR and opens one summary issue.
+name: ADR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'docs/architecture/decisions/**/*.md'
+      - 'docs/decisions/**/*.md'
+      - 'docs/adr/**/*.md'
+  workflow_dispatch:
+    inputs:
+      adr_glob:
+        description: 'Glob for ADRs to review'
+        required: false
+        default: 'docs/architecture/decisions/**/*.md'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  review-changed-adrs:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --max-turns 15
+            --model claude-opus-4-8
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are reviewing Architecture Decision Records (ADRs) changed in this pull request.
+
+            Approach this as an outsider: you have access to the entire codebase, but you did NOT participate in the discussion that led to these decisions. Your job is NOT to validate the author's reasoning — it is to surface what they may have missed.
+
+            ## Phase 1: Context-gathering
+            1. Identify the ADR file(s) changed in this PR (diff against base).
+            2. Read every other ADR in the same directory to understand prior decisions and architectural trajectory.
+            3. Scan the codebase for patterns related to this ADR's domain (modules, services, layers it touches).
+            4. Read top-level architectural docs (README, ARCHITECTURE.md, CONTRIBUTING.md) if they exist.
+
+            ## Phase 2: Critique
+            For each changed ADR, evaluate along these dimensions. State the finding AND the reasoning — not just a verdict. Skip dimensions where you have no material concern.
+
+            1. **Codebase fit** — Does this align with existing patterns, or introduce a new paradigm? If new, is the deviation justified? Cite specific files/modules.
+            2. **Reversibility / migration cost** — If this turns out wrong in 6-12 months, what does it cost to back out? Estimate: trivial / moderate / hard / catastrophic, with reasoning.
+            3. **Operational cost** — Runtime cost, maintenance burden, new infra/tools required. What's the ongoing tax?
+            4. **Cognitive cost / onboarding** — Does this add complexity new contributors must learn? Specialized knowledge required?
+            5. **Consistency with other ADRs** — Does it complement, complicate, or contradict prior decisions? Should any older ADR be superseded or cross-referenced?
+
+            ## Phase 3: Hidden bets
+            Identify 1-3 load-bearing assumptions. For each: what is it, what supports it, what does the system look like if it turns out wrong?
+
+            ## Phase 4: Missing alternatives
+            List 1-3 alternatives the ADR did not consider (or did not consider seriously). One-line argument for when each would be preferable.
+
+            ## Output
+            Post a SINGLE comment on PR #${{ github.event.pull_request.number }} using `gh pr comment`. Structure:
+
+            **Verdict**: SOUND / WORTH DISCUSSING / NEEDS REWORK
+
+            **Strengths** (1-3 bullets)
+
+            **Concerns** (organized by the dimensions above — only include where there's something material)
+
+            **Load-bearing assumptions** (1-3)
+
+            **Missing alternatives** (1-3)
+
+            **Questions for the author** (1-3 specific, answerable questions)
+
+            Constraints:
+            - Be honest. If the ADR is solid, say so — don't manufacture concerns.
+            - Be specific. "Won't scale" is useless; "assumes <10K req/s, but service-X handles 80K according to docs/scaling.md" is useful.
+            - Cite the codebase. When you reference fit, reversibility, or consistency, point at specific files or ADRs.
+            - Do not edit the ADR. Do not approve or request changes. Comment only.
+
+  review-all-adrs:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --max-turns 50
+            --model claude-opus-4-8
+          prompt: |
+            REPO: ${{ github.repository }}
+            ADR PATTERN: ${{ github.event.inputs.adr_glob }}
+
+            Review every Architecture Decision Record matching the pattern above.
+
+            Process ADRs sequentially, one at a time. Do not parallelize — context compounds across reads, and the critique gets sharper after you've seen several.
+
+            For each ADR, perform the same critique as the per-PR review (5 dimensions: codebase fit, reversibility, operational cost, cognitive cost, consistency; plus load-bearing assumptions and missing alternatives).
+
+            BUT:
+            - For ADRs that are SOUND, give a 1-2 line summary, not a full critique. Save depth for the ones that need it.
+            - Look for *patterns across ADRs*: recurring assumptions, ADRs that should be revisited together, decisions that have implicitly drifted from prior commitments.
+
+            ## Output
+            Create a SINGLE GitHub Issue using `gh issue create`. Title: "ADR Review Pass — $(date +%Y-%m-%d)". Body:
+
+            **Executive summary** (5 bullets: themes, recurring assumptions, ADRs that should be revisited together, any contradictions surfaced, overall health)
+
+            **Per-ADR findings** (one section per ADR, depth proportional to concern level)
+
+            **Recommended next steps** (concrete, in priority order)
+
+            Constraints:
+            - Honesty over volume. Don't pad.
+            - Group related findings; cite ADR paths and code paths specifically.
+            - Do not edit any ADR. Do not open PRs. Create the Issue only.
