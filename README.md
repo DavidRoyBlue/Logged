@@ -1,6 +1,6 @@
 # Logged
 
-> Pair file: [`./CLAUDE.md`](./CLAUDE.md) — agent-binding rules and invariants.
+> Pair file: [`./AGENTS.md`](./AGENTS.md) — agent-binding rules and invariants.
 
 Logged is a mobile running app that automatically syncs your Strava activities, manages app-owned training plans, and pushes those plans to Google Calendar and Notion. When a run comes in from Strava, Logged matches it to the nearest planned session and marks it complete.
 
@@ -55,8 +55,8 @@ logged/
 ├── docs/
 │   ├── adr/            # Architecture Decision Records
 │   └── superpowers/    # Specs and implementation plans
-├── CLAUDE.md           # Agent-binding rules (root)
-├── CLAUDE.nested.template.md  # Template for per-subtree CLAUDE.md
+├── AGENTS.md           # Agent-binding rules (root)
+├── AGENTS.nested.template.md  # Template for per-subtree AGENTS.md
 ├── README.template.md         # Template for per-subtree README.md
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
@@ -111,8 +111,8 @@ pnpm exec supabase stop
 |----------|----------|
 | Design spec (Layer 0) | [`docs/superpowers/specs/2026-06-02-logged-layer0-design.md`](docs/superpowers/specs/2026-06-02-logged-layer0-design.md) |
 | Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) |
-| Agent-binding rules | [`CLAUDE.md`](CLAUDE.md) |
-| Per-subtree doc templates | `CLAUDE.nested.template.md`, `README.template.md` |
+| Agent-binding rules | [`AGENTS.md`](AGENTS.md) |
+| Per-subtree doc templates | `AGENTS.nested.template.md`, `README.template.md` |
 
 ---
 
