@@ -13,8 +13,23 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: pnpm }
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.104.0 }
+      - run: supabase start
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - name: Export local Supabase env
+        # `supabase status -o env` (v2.104.0) emits: API_URL, ANON_KEY, SERVICE_ROLE_KEY
+        # services/worker's integration tests read: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+        # We remap here so the names match what the tests expect.
+        run: |
+          eval "$(pnpm exec supabase status -o env)"
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+        shell: bash
       - run: pnpm -r --filter '!@logged/db-tests' test
 
   db-test:
