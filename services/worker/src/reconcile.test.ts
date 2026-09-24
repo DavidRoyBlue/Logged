@@ -4,10 +4,20 @@
  * Strava is fully faked — no real network calls.
  */
 import { describe, it, expect, afterEach, beforeEach } from "vitest";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient,
+  type SupabaseClient,
+  type WebSocketLikeConstructor,
+} from "@supabase/supabase-js";
+import ws from "ws";
 import { reconcileUser } from "./reconcile";
 import { FakeStravaClient } from "./strava";
 import { Db } from "./db";
+
+// `ws`'s WebSocket has an overloaded constructor (a `null`-only signature for
+// server mode); realtime-js's WebSocketLikeConstructor only models the client
+// signature, so a direct assignment doesn't structurally match.
+const wsTransport = ws as unknown as WebSocketLikeConstructor;
 
 // ---------------------------------------------------------------------------
 // Supabase client helpers
@@ -20,6 +30,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
 function svc(): SupabaseClient {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
+    realtime: { transport: wsTransport },
   });
 }
 

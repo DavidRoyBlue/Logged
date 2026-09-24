@@ -86,6 +86,7 @@ docker build -t logged-worker services/worker/
 - The top-level `await import("@hono/node-server")` in `src/index.ts` requires ESM (`"type": "module"` in package.json) and an ES2022+ TypeScript target — both are satisfied by the base tsconfig.
 - Do not run `pnpm --filter @logged/worker dev` during tests — the listener guard checks `VITEST=true` which Vitest sets automatically.
 - Worker connects to Postgres via Supavisor pooler on port 6543 (transaction mode), not the direct Postgres port 5432.
+- `createClient` (and thus `Db`) must pass `realtime: { transport: ws }` (the `ws` package). `@supabase/realtime-js`'s Phoenix socket falls back to `global.WebSocket` when no transport is given, which doesn't exist on Node < 22 (our CI and Cloud Run both run Node 20) — without this, any code path that connects the realtime client throws "Node.js 20 detected without native WebSocket support." Passing `transport` explicitly always wins over the native/`global.WebSocket` fallback, so this is safe on any Node version.
 
 ---
 
