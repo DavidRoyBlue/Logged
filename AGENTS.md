@@ -149,6 +149,8 @@ Nested rules extend this root file and narrow it within their subtree.
 - Verification commands (tests, typecheck, lint) → nearest `AGENTS.md`
 - Broader workflows → nearest README, plus root README if globally relevant
 - Non-obvious code behavior → code comment
+- What happens next in the repo → `docs/roadmap.md`; every PR that changes it updates that file
+- A decision and its rationale → `docs/decisions.md`; every PR that makes one adds a line there (newest first)
 
 ---
 
